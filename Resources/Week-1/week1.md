@@ -21,6 +21,7 @@ These three short videos (total ~45 minutes) are carefully chosen to build int
 | 🎥 Video | [Bayes theorem, the geometry of changing beliefs – 3Blue1Brown](https://www.youtube.com/watch?v=HZGCoVF3YvM) | 18 min | Visual, geometric explanation of Bayes. You’ll need this when we derive the reverse diffusion posterior in Week 7–8. |
 | 🎥 Video | [Why π is in the normal distribution – 3Blue1Brown](https://www.youtube.com/watch?v=cy8r7WSuT1I) | 24 min | Not essential but beautiful – it explains why Gaussians appear everywhere in nature and ML. Helps you *feel* why we use them. |
 | 🎥 Video | [KL Divergence – CLEARLY EXPLAINED! – StatQuest](https://www.youtube.com/watch?v=9_eZHt2qJs4) | 12 min | The single most important concept for the VAE loss (ELBO). No heavy math, just the intuition of “information gain”. |
+| Article | The Road from MLE to EM to VAE [https://www.sciencedirect.com/science/article/pii/S2666651021000279?utm_source=chatgpt.com] | - | his is probably the best “bridge” article from: probability basics, Bayes intuition, latent variables, KL divergence and VAEs without becoming too theoretical. |
 
 
 ---

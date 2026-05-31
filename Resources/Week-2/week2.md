@@ -145,7 +145,7 @@ print(f"ELBO (loss):         {elbo:.4f}")
 
 **Due:** Before Week 3 begins.
 
-**Submission Form:** [https://forms.gle/KvUq47T84hPtXcyQA] (You have to share your Colab notebook link)
+**Submission Form:** https://forms.gle/KvUq47T84hPtXcyQA (You have to share your Colab notebook link)
 
 ---
 

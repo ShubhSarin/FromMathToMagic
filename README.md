@@ -93,3 +93,4 @@ CPU is fine for Weeks 0–4. GPU becomes useful from Week 5 onward.
 - [Week 0 - Python, PyTorch and more](Resources/Week-0/Week0.md)
 - [Week 1 - The Math of Uncertainty](Resources/Week-1/week1.md)
 - [Week 2 - Deriving the VAE Loss (ELBO)](Resources/Week-2/week2.md)
+- [Week 3 - Your First Generative Model (Milestone 1)](Resources/Week-3/week3.md)

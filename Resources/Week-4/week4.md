@@ -25,6 +25,26 @@ The only difference: `nn.Linear` becomes `nn.Conv2d` / `nn.ConvTranspose2d`. Tha
 
 ---
 
+## Configuration Central — Your Playground
+
+Before diving into the code, here are **every knob you can turn**. Change these and watch what happens — that's how you build intuition. Look for `# [PLAY]` comments in the code — each one marks a value worth experimenting with.
+
+| Parameter | Default | What it controls | Try changing to... |
+|-----------|---------|------------------|---------------------|
+| `latent_dim` | 20 | Size of the compressed code. Bigger = more detail, more risk of overfit. | 2, 10, 50, 100 |
+| `hidden_dims` | `[32, 64, 128]` | Encoder channel sizes. More channels = more capacity. | `[16, 32, 64]` (smaller), `[64, 128, 256]` (bigger) |
+| `kernel_size` | 3 | Size of convolution filters. Bigger = larger receptive field. | 5 |
+| `learning_rate` | `1e-3` | How fast the model learns. Too high = unstable, too low = slow. | `5e-4`, `3e-3`, `1e-4` |
+| `batch_size` | 128 | Number of images per gradient update. Memory-limited on Colab. | 64, 256 |
+| `epochs` | 30 | Training duration. MNIST learns fast — 20 may be enough. | 10, 50, 100 |
+| `beta` ($\beta$) | 1.0 | KL weight. Higher = smoother latent, blurrier output. | 0.0, 0.1, 0.5, 2.0, 5.0 |
+| `recon_loss_type` | `BCE` | How to measure reconstruction error. | `MSE` (easier, blurrier) |
+
+> [!TIP]
+> **Change ONE thing at a time, retrain, and compare.** That's how you learn what each knob does. The `[PLAY]` comments in the code below show you exactly where to edit.
+
+---
+
 ## Why Convolutions? The Linear VAE's Hidden Limitation
 
 ### What Went Wrong With Images
@@ -170,40 +190,64 @@ print(f"Pixel range: [{images.min():.2f}, {images.max():.2f}]")
 
 ```python
 class ConvVAE(nn.Module):
-    def __init__(self, latent_dim=20):
+    def __init__(self, latent_dim=20, hidden_dims=None, kernel_size=3):
+        """
+        Args:
+            latent_dim: size of the latent code z        # [PLAY]
+            hidden_dims: list of channel sizes per layer # [PLAY] try [16,32,64] or [64,128,256]
+            kernel_size: size of conv filters            # [PLAY] try 5
+        """
         super().__init__()
         self.latent_dim = latent_dim
+        if hidden_dims is None:
+            hidden_dims = [32, 64, 128]  # [PLAY] ← change these three numbers!
 
         # ---- Encoder: 1×28×28 → latent distribution ----
-        self.encoder = nn.Sequential(
-            nn.Conv2d(1, 32, kernel_size=3, stride=2, padding=1),  # → 32×14×14
-            nn.ReLU(),
-            nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1),  # → 64×7×7
-            nn.ReLU(),
-            nn.Conv2d(64, 128, kernel_size=3, stride=2, padding=0), # → 128×3×3
-            nn.ReLU(),
-            nn.Flatten(),
-        )
+        # Build encoder dynamically from hidden_dims list
+        encoder_layers = []
+        in_ch = 1
+        for i, out_ch in enumerate(hidden_dims):
+            # Last conv layer uses padding=0; others use padding=1
+            pad = 0 if i == len(hidden_dims) - 1 else 1
+            encoder_layers.extend([
+                nn.Conv2d(in_ch, out_ch, kernel_size=kernel_size, stride=2, padding=pad),
+                nn.ReLU(),
+            ])
+            in_ch = out_ch
+        encoder_layers.append(nn.Flatten())
+        self.encoder = nn.Sequential(*encoder_layers)
 
-        # Compute flattened size: 128 * 3 * 3 = 1152
-        self.fc_mu    = nn.Linear(1152, latent_dim)
-        self.fc_logvar = nn.Linear(1152, latent_dim)
+        # Compute flattened size dynamically
+        # After stride=2 three times: 28/2=14, 14/2=7, 7/2=3 (floor)
+        # Last conv: kernel=3, stride=2, pad=0 on 7×7 → ceil((7-3+1)/2) = 3
+        self.flattened_size = hidden_dims[-1] * 3 * 3
+        self.last_channel   = hidden_dims[-1]  # for reshape in decode
+
+        self.fc_mu    = nn.Linear(self.flattened_size, latent_dim)
+        self.fc_logvar = nn.Linear(self.flattened_size, latent_dim)
 
         # ---- Decoder: latent → 1×28×28 ----
-        self.decoder_input = nn.Linear(latent_dim, 128 * 3 * 3)
+        self.decoder_input = nn.Linear(latent_dim, self.flattened_size)
 
-        self.decoder = nn.Sequential(
-            nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1), # → 64×6×6
-            nn.ReLU(),
-            nn.ConvTranspose2d(64, 32, kernel_size=4, stride=2, padding=1),  # → 32×12×12
-            nn.ReLU(),
-            nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1),   # → 1×24×24
+        # Build decoder dynamically from reversed hidden_dims
+        decoder_layers = []
+        rev_dims = list(reversed(hidden_dims))
+        for i in range(len(rev_dims) - 1):
+            decoder_layers.extend([
+                nn.ConvTranspose2d(rev_dims[i], rev_dims[i+1],
+                                   kernel_size=4, stride=2, padding=1),
+                nn.ReLU(),
+            ])
+        # Final layer: rev_dims[-1] → 1
+        decoder_layers.extend([
+            nn.ConvTranspose2d(rev_dims[-1], 1, kernel_size=4, stride=2, padding=1),
             nn.Sigmoid(),  # output in [0, 1] to match input
-        )
+        ])
+        self.decoder = nn.Sequential(*decoder_layers)
 
     def encode(self, x):
         """x: [B, 1, 28, 28] → mu: [B, latent_dim], logvar: [B, latent_dim]"""
-        h = self.encoder(x)           # [B, 1152]
+        h = self.encoder(x)           # [B, flattened_size]
         mu = self.fc_mu(h)            # [B, latent_dim]
         logvar = self.fc_logvar(h)    # [B, latent_dim]
         return mu, logvar
@@ -216,8 +260,8 @@ class ConvVAE(nn.Module):
 
     def decode(self, z):
         """z: [B, latent_dim] → reconstruction: [B, 1, 24, 24]"""
-        h = self.decoder_input(z)             # [B, 128*3*3]
-        h = h.view(-1, 128, 3, 3)            # reshape to [B, 128, 3, 3]
+        h = self.decoder_input(z)             # [B, flattened_size]
+        h = h.view(-1, self.last_channel, 3, 3)   # reshape to [B, C_last, 3, 3]
         return self.decoder(h)                # [B, 1, 24, 24]
 
     def forward(self, x):
@@ -302,10 +346,17 @@ def evaluate(model, loader, beta=1.0):
 ### Step 5: Run Training
 
 ```python
-model = ConvVAE(latent_dim=20).to(device)
-optimizer = optim.Adam(model.parameters(), lr=1e-3)
+# ===== CONFIGURATION -- change these! =====
+LATENT_DIM  = 20       # [PLAY] size of latent code z
+LEARNING_RATE = 1e-3   # [PLAY] try 5e-4 or 3e-3
+EPOCHS      = 30       # [PLAY] try 10, 50, 100
+BETA        = 1.0      # [PLAY] KL weight -- try 0.1, 0.5, 2.0
+# ==========================================
 
-epochs = 30
+model = ConvVAE(latent_dim=LATENT_DIM).to(device)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+
+epochs = EPOCHS
 history = {{"train_loss": [], "train_bce": [], "train_kld": [],
            "test_loss":  [], "test_bce":  [], "test_kld":  []}}
 
@@ -314,8 +365,8 @@ print(f"{{'Epoch':>6}} {{'Train Loss':>12}} {{'Train BCE':>12}} {{'Train KLD':>1
 print("-" * 78)
 
 for epoch in range(1, epochs + 1):
-    train_l, train_b, train_k = train_epoch(model, train_loader, optimizer)
-    test_l,  test_b,  test_k  = evaluate(model, test_loader)
+    train_l, train_b, train_k = train_epoch(model, train_loader, optimizer, beta=BETA)
+    test_l,  test_b,  test_k  = evaluate(model, test_loader, beta=BETA)
 
     history["train_loss"].append(train_l)
     history["train_bce"].append(train_b)
@@ -651,6 +702,59 @@ Generate and include ALL FOUR visualizations:
 
 - [ ] Implement KL annealing and show that it improves generation quality compared to β=1.0
 - [ ] Include a before/after comparison: generated digits with annealing vs without
+
+---
+---
+
+## Playground: Experiments to Try
+
+Now that you have a working model, **break it and fix it**. Each experiment below targets one knob from the Configuration Central table. Change only ONE thing per experiment, retrain, and write down what changed.
+
+### Experiment 1: Tiny vs Huge Latent Code
+| Run | `latent_dim` | Expected result |
+|-----|-------------|-----------------|
+| A | 2 | Blurry reconstructions, but t-SNE shows perfect 2D clusters. Generated digits are limited. |
+| B | 100 | Sharp reconstructions, but KL is high and generated digits may be weird. |
+| C | 20 (default) | The compromise. |
+
+**Question:** Why does `latent_dim=2` give worse reconstructions but a cleaner t-SNE?
+
+### Experiment 2: Channel Scaling
+| Run | `hidden_dims` | Parameters | Expected |
+|-----|--------------|------------|----------|
+| A | `[16, 32, 64]` | ~60K | Faster training, slightly blurrier output |
+| B | `[32, 64, 128]` (default) | ~240K | Good balance |
+| C | `[64, 128, 256]` | ~1M | Slower, sharper, may overfit |
+
+**Question:** At what point do more channels stop improving reconstructions?
+
+### Experiment 3: Kernel Size
+| Run | `kernel_size` | Expected |
+|-----|-------------|----------|
+| A | 3 (default) | Normal |
+| B | 5 | Slightly larger receptive field; check if output size changes |
+
+**Hint:** If you change `kernel_size`, the output size formula changes. You may need to adjust `F.interpolate` or the padding.
+
+### Experiment 4: Learning Rate Sweep
+| Run | `LEARNING_RATE` | Expected |
+|-----|----------------|----------|
+| A | `1e-4` | Slower convergence, maybe lower final loss |
+| B | `1e-3` (default) | Normal |
+| C | `3e-3` | Faster, but may oscillate or diverge (NaN loss) |
+| D | `1e-2` | Almost certainly NaN — that's how you learn what "too high" means |
+
+### Experiment 5: Reconstruction Loss Type
+| Run | Loss | Code change | Expected |
+|-----|------|-------------|----------|
+| A | BCE (default) | `F.binary_cross_entropy(...)` | Crisper edges |
+| B | MSE | `F.mse_loss(recon_resized, x, reduction='sum')` | Blurrier, but easier to train |
+
+### Experiment 6: Fewer Epochs
+Try `EPOCHS = 5` and `EPOCHS = 10`. At what epoch do reconstructions become recognizable? How about generated samples? This teaches you the "speed of learning" for each VAE component — the decoder learns faster than the encoder.
+
+> [!TIP]
+> **Keep a log.** For each experiment, save one screenshot of generated digits and one of reconstructions. After 5-6 experiments, you'll have visual intuition for what every knob controls — and that's worth more than any derivation.
 
 ---
 

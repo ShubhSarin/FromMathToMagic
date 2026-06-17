@@ -48,7 +48,10 @@ Now `μ` and `σ` are deterministic computations your network outputs, gradients
 
 ---
 
-## 📝 The ELBO Derivation (Step-by-Step)
+## 📝 The ELBO Derivation (OPTIONAL — Skip if You Just Want to Build)
+
+> [!IMPORTANT]
+> **You do NOT need to understand this derivation to complete Weeks 3-6.** The loss function is two formulas (reconstruction + KL) that you can copy-paste. This derivation explains WHERE those formulas come from. If you're excited to understand why, go ahead. If you'd rather build things and come back later, skip to the [Checkpoint](#-checkpoint-verify-the-elbo-numerically) below.
 
 Work through this with a pen and paper alongside the Lilian Weng article. The goal is not to memorise — it is to understand each step well enough to explain it out loud.
 
@@ -90,6 +93,23 @@ KL(q || p) = -½ Σ (1 + log σ² - μ² - σ²)
 ```
 
 This is what you'll implement. No sampling needed for this term — it's exact.
+
+---
+
+## 🎯 What You Actually Need (Skip the Derivation? Start Here)
+
+If you skipped the derivation above, here are the ONLY two formulas you need for every future week:
+
+```
+Reconstruction loss:  L_recon = ||x - x_hat||^2        (MSE between input and reconstruction)
+KL divergence:        KL = -½ Σ (1 + log σ² - μ² - σ²)   (pushes latent codes toward N(0,1))
+Total VAE loss:       L_VAE = L_recon + KL
+```
+
+That's it. The reconstruction term says "make the output look like the input." The KL term says "keep the latent space smooth." They compete — that competition is what makes the VAE generative. Every week from here on, you type these three lines and move on.
+
+> [!TIP]
+> **Memory hook:** Recon = accuracy. KL = organization. You need both.
 
 ---
 
@@ -265,3 +285,16 @@ Answer the following in a **Markdown cell** in your notebook. 2–4 sentences pe
 | Part 3 — ELBO loss          | 30      | Returns scalar; BCE + KL combined correctly             |
 | Part 4 — Reflection         | 20      | Thoughtful, correct reasoning (not just copy-paste)     |
 | **Total**                   | **100** |                                                         |
+
+---
+
+## 🚫 Skip for This Week
+
+- The original **Kingma & Welling VAE paper** — graduate-level, not for Week 2
+- Any blog post about **convolutional VAEs** — that's Week 4
+- The **DDPM paper** (Ho et al.) — that's Week 7+
+- The full Lilian Weng article **beyond Section 2** — Sections 3+ cover β-VAE and other variants not needed yet
+
+---
+
+*Back to [Project Overview](https://github.com/ShubhSarin/FromMathToMagic/blob/main/README.md)*

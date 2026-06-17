@@ -541,6 +541,9 @@ Same experiment as Week 4, but now you can SEE the effect on faces:
 | Article | [Understanding VAEs -- Joseph Rocca (TDS)](https://towardsdatascience.com/understanding-variational-autoencoders-vaes-f70510919f73) | Re-read Section 4 | The VAE on faces section |
 | Video | [VAE Latent Space Arithmetic -- Ahlad Kumar](https://www.youtube.com/watch?v=8zomhgKrsmQ) | 10 min | Preview of Week 6 -- what you can DO with a trained VAE |
 
+> [!NOTE]
+> **Skip for this week:** Don't read about DDPMs, UNets, or diffusion yet (Weeks 7-10). Don't read the original VAE paper. Don't read about GANs or StyleGAN — different architecture, different project. Focus on training your VAE and getting good face reconstructions.
+
 ---
 
 ## Assignment -- Week 5 (Graded)

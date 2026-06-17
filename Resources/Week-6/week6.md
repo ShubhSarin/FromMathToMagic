@@ -546,6 +546,15 @@ Answer in 3-5 sentences:
 
 ---
 
+## 🚫 Skip for This Week
+
+- The **DDPM paper** (Ho et al.) — that's Week 7+
+- Any blog post about **disentangled VAEs (β-VAE, FactorVAE)** — interesting but different project
+- The **InfoGAN** paper — similar ideas, different architecture
+- **StyleGAN** papers — same latent space concepts but GANs, not VAEs
+
+---
+
 ## What's Next?
 
 **Week 7 — The Mathematics of Noise:** You pivot from VAEs to the second pillar of Stable Diffusion: **Denoising Diffusion Probabilistic Models (DDPM)**. You'll derive the forward diffusion process, implement linear and cosine noise schedules, and learn the closed-form equation that lets you jump to any noise level in a single step.

@@ -95,3 +95,5 @@ CPU is fine for Weeks 0–4. GPU becomes useful from Week 5 onward.
 - [Week 2 - Deriving the VAE Loss (ELBO)](Resources/Week-2/week2.md)
 - [Week 3 - Your First Generative Model (Milestone 1)](Resources/Week-3/week3.md)
 - [Week 4 - Convolutional VAE on MNIST](Resources/Week-4/week4.md)
+- [Week 5 - Faces at Scale (CelebA)](Resources/Week-5/week5.md)
+- [Week 6 - Navigating Latent Space](Resources/Week-6/week6.md)

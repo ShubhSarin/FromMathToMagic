@@ -546,12 +546,14 @@ Answer in 3-5 sentences:
 
 ---
 
-## 🚫 Skip for This Week
+## Optional Deep Dive
 
 - The **DDPM paper** (Ho et al.) — that's Week 7+
 - Any blog post about **disentangled VAEs (β-VAE, FactorVAE)** — interesting but different project
 - The **InfoGAN** paper — similar ideas, different architecture
 - **StyleGAN** papers — same latent space concepts but GANs, not VAEs
+
+---
 
 ---
 

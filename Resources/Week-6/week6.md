@@ -56,7 +56,25 @@ The most remarkable property: **attributes are approximately linear in latent sp
 
 ---
 
-## Step 0: Load Your Model
+## Configuration Central — Your Playground
+
+Everything this week is inference-only. You're not training — you're exploring. These knobs control what you explore.
+
+| Parameter | Default | What it controls | Try changing to... |
+|-----------|---------|------------------|---------------------|
+| `morph_steps` | 30 | Frames in the morphing GIF. More = smoother. | 10, 60 |
+| `attr_strengths` | `[0.5, 1.0, 1.5, 2.0]` | How hard to apply each attribute. | `[0.25, 0.5, 0.75]` (subtle), `[1, 2, 3, 5]` (extreme) |
+| `n_attr_samples` | 2000 | Faces used to compute an attribute direction. More = cleaner vector. | 500 (quick), 5000 (cleaner) |
+| `attributes_to_find` | `['Smiling', 'Male', 'Eyeglasses', 'Young']` | Which attributes to discover. CelebA has 40. | Any from the `ATTR_NAMES` list |
+| `random_walk_steps` | 10 | How far to walk in a random direction. | 5, 20 |
+| `random_walk_size` | 1.0 | Step size for random walks. Bigger = more dramatic change. | 0.5, 2.0 |
+
+> [!TIP]
+> **Look for `# [PLAY]` comments in the code.** Change ONE thing, rerun, watch what changes. This is your chance to be a researcher — there's no "correct" answer, just discoveries.
+
+---
+
+## Step 0: Load Your Model## Step 0: Load Your Model
 
 ```python
 import torch
@@ -190,7 +208,7 @@ Walk the straight line between two faces in latent space.
 
 ```python
 @torch.no_grad()
-def face_morph(model, img1, img2, steps=30):
+def face_morph(model, img1, img2, steps=30):  # [PLAY] more steps = smoother GIF
     """
     img1, img2: [1, 3, 64, 64] tensors
     Returns: list of [3, 64, 64] numpy arrays (the morph frames)
@@ -283,7 +301,7 @@ ATTR_NAMES = [
     'Wearing_Necklace', 'Wearing_Necktie', 'Young'
 ]
 
-def get_attribute_vector(model, loader_with_attrs, attr_name, n_samples=2000):
+def get_attribute_vector(model, loader_with_attrs, attr_name, n_samples=2000):  # [PLAY] more samples = cleaner vector
     """
     Find the latent direction for an attribute.
     Returns: vector of shape [latent_dim]
@@ -310,7 +328,7 @@ def get_attribute_vector(model, loader_with_attrs, attr_name, n_samples=2000):
 
 
 @torch.no_grad()
-def apply_attribute(model, img, attr_vector, strength=1.0):
+def apply_attribute(model, img, attr_vector, strength=1.0):  # [PLAY] try 0.5, 2.0, 3.0
     """Add an attribute vector to a face's latent code."""
     mu, _ = model.encode(img.to(device))
     mu_modified = mu + strength * attr_vector.to(device)
@@ -410,7 +428,7 @@ Visualize what your model learned about each attribute:
 
 ```python
 @torch.no_grad()
-def attribute_grid(model, loader, attr_vectors, face_idx=0, strengths=[-1.5, -0.75, 0, 0.75, 1.5]):
+def attribute_grid(model, loader, attr_vectors, face_idx=0, strengths=[-1.5, -0.75, 0, 0.75, 1.5]  # [PLAY] try different strength ranges):
     """Create a grid showing one face modified by multiple attributes at multiple strengths."""
     x, _ = next(iter(loader))
     base_face = x[face_idx:face_idx+1]
@@ -451,7 +469,7 @@ What does a random direction in latent space correspond to?
 
 ```python
 @torch.no_grad()
-def random_walk(model, base_face, n_steps=10, step_size=0.5):
+def random_walk(model, base_face, n_steps=10, step_size=0.5):  # [PLAY] try n_steps=20, step_size=2.0
     """Walk in a random direction from a face's latent code."""
     mu, _ = model.encode(base_face.to(device))
 
@@ -476,7 +494,7 @@ def random_walk(model, base_face, n_steps=10, step_size=0.5):
     plt.show()
 
 x, _ = next(iter(loader))
-random_walk(model, x[3:4], n_steps=10, step_size=1.0)
+random_walk(model, x[3:4], n_steps=10, step_size=1.0)  # [PLAY] explore different directions
 ```
 
 **What you should see:** Some random directions change lighting, some change pose, some change identity entirely. Not all directions are interpretable — but the fact that SOME are (like the attribute vectors above) is remarkable given the model was never told about these concepts.
@@ -502,7 +520,35 @@ This is the same principle behind:
 
 ---
 
-## Common Problems
+## Playground: Discoveries to Make
+
+The experiments above give you the tools. Here are discoveries waiting to be made:
+
+### Discovery 1: Find a Surprising Attribute
+CelebA has 40 attributes. Try ones beyond the obvious: `'Bangs'`, `'Heavy_Makeup'`, `'Wearing_Hat'`, `'Chubby'`, `'Bald'`, `'Mustache'`. Which ones does your VAE represent well? Which are entangled with other features?
+
+### Discovery 2: Attribute Strength Limits
+At what `strength` does the "Smiling" vector stop looking like a smile and start looking like a distortion? Find the breaking point for each attribute. This tells you how *linear* the latent space really is.
+
+### Discovery 3: Model Comparison
+If you trained two models in Week 5 with different β values (e.g., β=0.3 and β=1.0), load both and compare:
+| Model β | Expected attribute behavior |
+|---------|---------------------------|
+| 0.3 | Sharper faces, but attributes may also change identity |
+| 1.0 | Smoother latent space, cleaner attribute separation, blurrier faces |
+
+### Discovery 4: Opposite Directions
+What happens when you *subtract* the "Smiling" vector? What about subtracting "Male"? Can you make someone look like the "opposite" of an attribute?
+
+### Discovery 5: Combine Unseen Attributes
+What happens when you combine `'Smiling'` + `'Eyeglasses'` + `'Bangs'`? Do the effects add cleanly, or do they interfere?
+
+> [!TIP]
+> **Take screenshots.** The best discoveries are visual. Keep a folder of "before/after" comparisons for each experiment. These are gold for your portfolio and for understanding what your model learned.
+
+---
+
+## Common Problems## Common Problems
 
 | Symptom | Likely Cause | Fix |
 |---------|-------------|-----|

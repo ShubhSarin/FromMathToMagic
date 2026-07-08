@@ -110,6 +110,29 @@ $$x_2 = \sqrt{\bar{\alpha}_2} x_0 + \sqrt{1 - \bar{\alpha}_2}\, \epsilon, \quad 
 
 By induction, this holds for any t. The same formula also means we can write the posterior $q(x_{t-1} | x_t, x_0)$ in closed form — which the reverse model will use during training.
 
+> [!TIP]
+> **Verify it numerically.** The Week 7 roadmap goal is to *verify* the closed-form, not just derive it. Generate many noisy samples at a fixed `t` and confirm their statistics match the formula:
+> - Mean of $x_t$ should equal $\sqrt{\bar{\alpha}_t}\, x_0$
+> - Variance of $x_t$ should equal $1 - \bar{\alpha}_t$ (per element)
+
+```python
+# ===== NUMERICAL CHECK: does x_t really follow N(√ᾱ_t x0, (1-ᾱ_t)I)? =====
+t = 600
+N = 2000
+x0_fixed = x[0:1].to(device)
+samples = []
+for _ in range(N):
+    eps = torch.randn_like(x0_fixed)
+    samples.append(sqrt_alphas_bar[t] * x0_fixed + sqrt_one_minus_alphas_bar[t] * eps)
+samples = torch.stack(samples)
+
+emp_mean = samples.mean(0)
+emp_var = samples.var(0)
+print(f"Mean error vs √ᾱ_t x0 : {(emp_mean - sqrt_alphas_bar[t] * x0_fixed).abs().mean():.4e}")
+print(f"Var error vs (1-ᾱ_t)  : {(emp_var - (1 - alphas_bar[t])).abs().mean():.4e}")
+# Both should be near machine precision — confirming the closed-form equation is correct.
+```
+
 ---
 
 ## Noise Schedules
@@ -201,6 +224,7 @@ Everything this week is math and visualization. No model training.
 | 🎥 Video | [Diffusion Models — Sohl-Dickstein et al. (animated)](https://www.youtube.com/watch?v=HoKDTa5jHvg) | 20 min | Best visual explanation of DDPM. Watch this FIRST — the math will click after the animation. |
 | 📄 Paper | [Denoising Diffusion Probabilistic Models — Ho, Jain, Abbeel (2020)](https://arxiv.org/abs/2006.11239) | ~45 min | The original DDPM paper. Read Sections 1-3 carefully. Section 3 is the closed-form derivation. |
 | 📄 Article | [What are Diffusion Models? — Lilian Weng](https://lilianweng.github.io/posts/2021-07-11-diffusion-models/) | ~40 min | Read the "Forward Process" and "Reverse Process" sections. Crystal clear exposition. |
+| 📄 Article | [How diffusion models work: the math from scratch — AI Summer](https://theaisummer.com/diffusion-models/) | ~35 min | The project roadmap's canonical Week 7 pick. Step-by-step derivation that pairs well with Lilian Weng. |
 | 🎥 Video | [Denoising Diffusion from Scratch — Outlier](https://www.youtube.com/watch?v=Hc45n0uRjAA) | 45 min | Derives the closed-form forward equation and shows the MU loss connection. Great for the math-heavy portion. |
 | 📄 Blog | [The Annotated Diffusion Model — Hugging Face](https://huggingface.co/blog/annotated-diffusion) | ~30 min | Code + math side-by-side. Perfect bridge between theory and implementation. |
 

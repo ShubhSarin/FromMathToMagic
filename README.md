@@ -97,3 +97,4 @@ CPU is fine for Weeks 0–4. GPU becomes useful from Week 5 onward.
 - [Week 4 - Convolutional VAE on MNIST](Resources/Week-4/week4.md)
 - [Week 5 - Faces at Scale (CelebA)](Resources/Week-5/week5.md)
 - [Week 6 - Navigating Latent Space](Resources/Week-6/week6.md)
+- [Week 7 - The Mathematics of Noise](Resources/Week-7/week7.md)

@@ -70,7 +70,7 @@ $$x_t = \sqrt{1 - \beta_t}\, x_{t-1} + \sqrt{\beta_t}\, \epsilon_{t-1}, \quad \e
 
 But stepping 1000 times is slow. We can do better.
 
-### Step 3: The Closed-Form Forward Equation ($$$ THE KEY EQUATION $$$)
+### Step 3: The Closed-Form Forward Equation
 
 This is the single most important equation in diffusion models. Thanks to the **additive property of independent Gaussians**, we can jump directly from x₀ to xₜ in one step:
 
@@ -278,11 +278,11 @@ elif schedule_type == "cosine":
 
 # Precompute all alpha values
 alphas = 1 - betas
-alphas_bar = torch.cumprod(alphas, dim=0)  # ƒÑ_t
+alphas_bar = torch.cumprod(alphas, dim=0)  # ᾱ_t
 sqrt_alphas_bar = torch.sqrt(alphas_bar)
 sqrt_one_minus_alphas_bar = torch.sqrt(1 - alphas_bar)
 
-print(f"ƒÑ_1 = {alphas_bar[0]:.6f}, ƒÑ_{T} = {alphas_bar[-1]:.6f}")
+print(f"ᾱ_1 = {alphas_bar[0]:.6f}, ᾱ_{T} = {alphas_bar[-1]:.6f}")
 print(f"beta_1 = {betas[0]:.6f}, beta_{T} = {betas[-1]:.6f}")
 ```
 
@@ -295,24 +295,24 @@ fig, axes = plt.subplots(1, 3, figsize=(15, 4))
 # Beta values across steps
 axes[0].plot(betas.cpu(), linewidth=1)
 axes[0].set_xlabel("Timestep t")
-axes[0].set_ylabel("ƒ�_t")
+axes[0].set_ylabel("ᾱ_t")
 axes[0].set_title(f"Noise Schedule: {schedule_type}")
 axes[0].grid(alpha=0.3)
 
-# Signal retention ƒÑ_t
+# Signal retention ᾱ_t
 axes[1].plot(alphas_bar.cpu(), linewidth=1, color="green")
 axes[1].axhline(y=0.5, color="red", linestyle="--", alpha=0.5, label="50% signal")
 axes[1].set_xlabel("Timestep t")
-axes[1].set_ylabel("ƒÑ_t (signal remaining)")
+axes[1].set_ylabel("ᾱ_t (signal remaining)")
 axes[1].set_title("Signal Decay Over Time")
 axes[1].legend()
 axes[1].grid(alpha=0.3)
 
-# Noise level 1-ƒÑ_t
+# Noise level 1-ᾱ_t
 axes[2].plot((1 - alphas_bar).cpu(), linewidth=1, color="orange")
 axes[2].axhline(y=0.5, color="red", linestyle="--", alpha=0.5, label="50% noise")
 axes[2].set_xlabel("Timestep t")
-axes[2].set_ylabel("1 - ƒÑ_t (noise fraction)")
+axes[2].set_ylabel("1 - ᾱ_t (noise fraction)")
 axes[2].set_title("Noise Accumulation Over Time")
 axes[2].legend()
 axes[2].grid(alpha=0.3)
@@ -324,7 +324,7 @@ plt.show()
 **What you should see:**
 - **Linear:** Signal drops quickly in the first ~200 steps, then slowly. Noise reaches ~99% by step 1000.
 - **Cosine:** Signal stays strong longer (until ~step 300), then drops. The final steps stay somewhat informative.
-- **Question:** At what step t does signal = noise (ƒÑ_t = 0.5)? Mark this on your plot.
+- **Question:** At what step t does signal = noise (ᾱ_t = 0.5)? Mark this on your plot.
 
 ### Step 3: The Closed-Form Forward — Visualize Destruction
 

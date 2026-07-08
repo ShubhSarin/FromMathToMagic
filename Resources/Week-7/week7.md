@@ -501,7 +501,7 @@ def ddpm_loss(model, x0, t, sqrt_alphas_bar, sqrt_one_minus_alphas_bar):
 
 **Title:** "The Mathematics of Noise"  
 **Due:** Before Week 8 begins  
-**Submission:** Colab notebook with all visualizations + short answers
+**Submission:** Colab notebook with all visualizations
 
 ### Part 1 — Noise Schedule Visualization (30 pts)
 
@@ -509,7 +509,6 @@ def ddpm_loss(model, x0, t, sqrt_alphas_bar, sqrt_one_minus_alphas_bar):
 - [ ] Plot βₜ vs t for both schedules in one figure
 - [ ] Plot $\bar{\alpha}_t$ (signal remaining) vs t for both schedules
 - [ ] Mark the step where $\bar{\alpha}_t = 0.5$ for each schedule — this is the "half-life" of the signal
-- [ ] Answer: *"Which schedule destroys information faster? At what step does each schedule reach 50% noise?"*
 
 ### Part 2 — Forward Diffusion Visualization (30 pts)
 
@@ -517,26 +516,22 @@ def ddpm_loss(model, x0, t, sqrt_alphas_bar, sqrt_one_minus_alphas_bar):
 - [ ] Show the face at steps `t ∈ [0, 10, 50, 100, 200, 500, 800, 999]` using the **linear** schedule
 - [ ] Repeat with the **cosine** schedule on the same face
 - [ ] Display both rows side by side for comparison
-- [ ] Answer: *"What visual difference do you notice between the two schedules at early steps (t=50)? At late steps (t=800)?"*
 
 ### Part 3 — SNR Analysis (20 pts)
 
 - [ ] Compute and plot SNR(t) on a log scale for the linear schedule
 - [ ] Find and report `t_snr_1` — the step where SNR = 1 (signal = noise)
 - [ ] Repeat for the cosine schedule
-- [ ] Answer: *"Why does the model need steps where SNR is very low (< 0.1)? Why does it also need steps where SNR is very high (> 100)?"*
 
 ### Part 4 — The Closed-Form Equation (20 pts)
 
 - [ ] Derive the closed-form forward equation $x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon$ by induction from the one-step equation $x_t = \sqrt{1 - \beta_t} x_{t-1} + \sqrt{\beta_t} \epsilon_{t-1}$
 - [ ] Submit your derivation as **LaTeX or a clear handwritten scan/photo**
-- [ ] Include a brief explanation in your own words (2-3 sentences): *"Why can we jump to any t in one step?"*
 
 ### Bonus — Visualize Different T Values (+10 pts)
 
 - [ ] Run the forward diffusion with T = 100, T = 500, and T = 2000 (all linear schedule)
 - [ ] Show the same timestep ratio (e.g., at 20%, 50%, 80% of each T) for comparison
-- [ ] Answer: *"How does T affect the smoothness of degradation? Would T=100 be enough for the model to learn good reverse steps?"*
 
 ---
 

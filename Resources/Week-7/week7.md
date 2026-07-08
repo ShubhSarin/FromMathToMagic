@@ -94,21 +94,16 @@ $$x_t = \sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon, \qua
 > [!TIP]
 > **Memorize this equation.** It's the foundation of every diffusion model — DDPM, DDIM, Stable Diffusion, DALL-E, Sora. When someone asks you how diffusion works, this equation is the answer.
 
-### Step 4: Derivation (For the Curious)
+### Step 4: Why You Can Jump Straight to x\u209ct (Intuition)
 
-If $x_1 = \sqrt{\alpha_1} x_0 + \sqrt{1 - \alpha_1} \epsilon_1$ and $x_2 = \sqrt{\alpha_2} x_1 + \sqrt{1 - \alpha_2} \epsilon_2$:
+You don't need to simulate 1,000 steps, and it comes down to one property of Gaussians: **a sum of independent Gaussians is itself Gaussian.** When you substitute $x_{t-1}$ into the equation for $x_t$, the two noise terms don't fight each other — they just *add* into one Gaussian. Stack that substitution $t$ times and every intermediate noise term collapses into a single $\epsilon$, leaving exactly the closed-form equation from Step 3:
 
-$$x_2 = \sqrt{\alpha_2}(\sqrt{\alpha_1} x_0 + \sqrt{1 - \alpha_1} \epsilon_1) + \sqrt{1 - \alpha_2} \epsilon_2$$
+$$x_t = \sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)$$
 
-$$x_2 = \sqrt{\alpha_2 \alpha_1} x_0 + \sqrt{\alpha_2(1 - \alpha_1)} \epsilon_1 + \sqrt{1 - \alpha_2} \epsilon_2$$
+> [!TIP]
+> **Skip the algebra — verify it instead.** The numerical check right after this section generates 2,000 noisy samples at a fixed $t$ and confirms their mean and variance match the formula to machine precision. That *is* the proof, and it's far more convincing than a page of variance arithmetic.
 
-Since $\epsilon_1$ and $\epsilon_2$ are independent Gaussians:
-- Variance of combined noise = $(\sqrt{\alpha_2(1 - \alpha_1)})^2 + (\sqrt{1 - \alpha_2})^2 = \alpha_2(1 - \alpha_1) + (1 - \alpha_2) = 1 - \alpha_1\alpha_2 = 1 - \bar{\alpha}_2$
-
-Therefore:
-$$x_2 = \sqrt{\bar{\alpha}_2} x_0 + \sqrt{1 - \bar{\alpha}_2}\, \epsilon, \quad \epsilon \sim \mathcal{N}(0, I)$$
-
-By induction, this holds for any t. The same formula also means we can write the posterior $q(x_{t-1} | x_t, x_0)$ in closed form — which the reverse model will use during training.
+The same closed form also gives you the posterior $q(x_{t-1} \mid x_t, x_0)$ in one shot — the equation the reverse (learned) model will rely on once we start training in Week 8.
 
 > [!TIP]
 > **Verify it numerically.** The Week 7 roadmap goal is to *verify* the closed-form, not just derive it. Generate many noisy samples at a fixed `t` and confirm their statistics match the formula:
@@ -525,8 +520,8 @@ def ddpm_loss(model, x0, t, sqrt_alphas_bar, sqrt_one_minus_alphas_bar):
 
 ### Part 4 — The Closed-Form Equation (20 pts)
 
-- [ ] Derive the closed-form forward equation $x_t = \sqrt{\bar{\alpha}_t} x_0 + \sqrt{1 - \bar{\alpha}_t} \epsilon$ by induction from the one-step equation $x_t = \sqrt{1 - \beta_t} x_{t-1} + \sqrt{\beta_t} \epsilon_{t-1}$
-- [ ] Submit your derivation as **LaTeX or a clear handwritten scan/photo**
+- [ ] In your notebook, run the numerical check on the closed-form: generate many noisy samples at a fixed $t$ and confirm their mean $\approx \sqrt{\bar{\alpha}_t}\,x_0$ and variance $\approx 1 - \bar{\alpha}_t$
+- [ ] In 1-2 lines, state *why* the additivity of independent Gaussians lets you jump straight to any $t$ instead of simulating every step
 
 ### Bonus — Visualize Different T Values (+10 pts)
 

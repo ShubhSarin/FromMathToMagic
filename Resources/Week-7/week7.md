@@ -210,6 +210,9 @@ Everything this week is math and visualization. No model training.
 | `schedule` | `'linear'` | Shape of noise addition. | `'cosine'`, `'sigmoid'` |
 | `img_idx` | 0 | Which CelebA face to visualize through diffusion. | 0-199,999 |
 
+> [!TIP]
+> **Look for `# [PLAY]` comments in the code.** Change ONE thing, rerun, and watch what changes. That's your chance to be a researcher — there's no single "correct" answer, just discoveries.
+
 ---
 
 ## 📚 Required Resources
@@ -253,10 +256,10 @@ x = x.to(device)
 ### Step 1: Define the Forward Diffusion Schedule
 
 ```python
-# ===== CONFIGURATION =====  [PLAY] change T, beta_start, beta_end
-T = 1000
-beta_start = 1e-4
-beta_end = 0.02
+# ===== CONFIGURATION =====  [PLAY] change any value below and rerun
+T = 1000  # [PLAY] try 500, 2000
+beta_start = 1e-4  # [PLAY] try 1e-5, 1e-3
+beta_end = 0.02  # [PLAY] try 0.01, 0.05
 schedule_type = "linear"  # [PLAY] try "cosine"
 
 # ===== DEFINE SCHEDULE =====

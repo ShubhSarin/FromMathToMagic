@@ -48,6 +48,9 @@ No UNet, no loss. The "destruction" is fully determined by the schedule and a si
 | `img_source` | `'celeba'` | Which image to destroy. | your own 64×64 photo |
 | `n_frames` | 100 | Frames sampled for the GIF. | 200, 500 |
 
+> [!TIP]
+> **Look for `# [PLAY]` comments in the code.** Change ONE thing, rerun, and watch what changes. That's your chance to be a researcher — there's no single "correct" answer, just discoveries.
+
 ---
 
 ## 📚 Required Resources
@@ -93,7 +96,7 @@ print(f"x0 shape: {x0.shape}")   # [1, 3, 64, 64]
 class ForwardDiffusion:
     """Reusable fixed forward process (no learning)."""
 
-    def __init__(self, T=1000, schedule="linear", device="cpu"):
+    def __init__(self, T=1000, schedule="linear", device="cpu"):  # [PLAY] defaults: T, schedule
         self.T = T
         self.device = device
         if schedule == "linear":
@@ -135,7 +138,7 @@ class ForwardDiffusion:
 The Week 8 checkpoint is *"the noise math is correct and verified."* Two cheap tests confirm your pipeline matches the theory:
 
 ```python
-fd = ForwardDiffusion(T=1000, schedule="linear", device=device)
+fd = ForwardDiffusion(T=1000, schedule="linear", device=device)  # [PLAY] try T=500, schedule="cosine"
 
 # (a) t = 0 must return the image unchanged (ε term has zero coefficient)
 xt0, _ = fd.q_sample(x0, torch.tensor([0], device=device))
@@ -157,20 +160,20 @@ print(f"x_T std  : {xT.std():.4f}  (target 1.0)")
 Run the trajectory across all 1,000 steps and stitch it into a GIF:
 
 ```python
-ts, frames = fd.trajectory(x0, n_frames=100)   # 100 frames sampled from 0..999
+ts, frames = fd.trajectory(x0, n_frames=100)   # [PLAY] try n_frames=200 for a smoother GIF
 
 imgs = []
 for xt in frames:
     arr = xt[0].cpu().permute(1, 2, 0).clamp(0, 1).numpy()
     imgs.append((arr * 255).astype("uint8"))
 
-imageio.mimsave("diffusion_destruction.gif", imgs, fps=12)
+imageio.mimsave("diffusion_destruction.gif", imgs, fps=12)  # [PLAY] try fps=24 for faster, 6 for slower
 print("saved diffusion_destruction.gif")
 ```
 
 ```python
 # Or just display a row of representative frames:
-sample_steps = [0, 50, 100, 250, 500, 750, 999]
+sample_steps = [0, 50, 100, 250, 500, 750, 999]  # [PLAY] try different step ranges
 fig, axes = plt.subplots(1, len(sample_steps), figsize=(18, 3))
 for i, t in enumerate(sample_steps):
     xt, _ = fd.q_sample(x0, torch.tensor([t], device=device))
@@ -186,8 +189,8 @@ plt.tight_layout(); plt.show()
 ### Step 4: Linear vs Cosine — Full Run
 
 ```python
-fd_lin = ForwardDiffusion(T=1000, schedule="linear", device=device)
-fd_cos = ForwardDiffusion(T=1000, schedule="cosine", device=device)
+fd_lin = ForwardDiffusion(T=1000, schedule="linear", device=device)  # [PLAY] swap to "cosine" to compare
+fd_cos = ForwardDiffusion(T=1000, schedule="cosine", device=device)  # [PLAY] default cosine here
 
 fig, axes = plt.subplots(2, len(sample_steps), figsize=(18, 6))
 for i, t in enumerate(sample_steps):

@@ -94,7 +94,7 @@ $$x_t = \sqrt{\bar{\alpha}_t}\, x_0 + \sqrt{1 - \bar{\alpha}_t}\, \epsilon, \qua
 > [!TIP]
 > **Memorize this equation.** It's the foundation of every diffusion model — DDPM, DDIM, Stable Diffusion, DALL-E, Sora. When someone asks you how diffusion works, this equation is the answer.
 
-### Step 4: Why You Can Jump Straight to x\u209ct (Intuition)
+### Step 4: Why You Can Jump Straight to xₜ (Intuition)
 
 You don't need to simulate 1,000 steps, and it comes down to one property of Gaussians: **a sum of independent Gaussians is itself Gaussian.** When you substitute $x_{t-1}$ into the equation for $x_t$, the two noise terms don't fight each other — they just *add* into one Gaussian. Stack that substitution $t$ times and every intermediate noise term collapses into a single $\epsilon$, leaving exactly the closed-form equation from Step 3:
 

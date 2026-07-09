@@ -98,3 +98,4 @@ CPU is fine for Weeks 0–4. GPU becomes useful from Week 5 onward.
 - [Week 5 - Faces at Scale (CelebA)](Resources/Week-5/week5.md)
 - [Week 6 - Navigating Latent Space](Resources/Week-6/week6.md)
 - [Week 7 - The Mathematics of Noise](Resources/Week-7/week7.md)
+- [Week 8 - Controlled Destruction](Resources/Week-8/week8.md)

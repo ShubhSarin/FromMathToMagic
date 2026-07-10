@@ -99,3 +99,7 @@ CPU is fine for Weeks 0–4. GPU becomes useful from Week 5 onward.
 - [Week 6 - Navigating Latent Space](Resources/Week-6/week6.md)
 - [Week 7 - The Mathematics of Noise](Resources/Week-7/week7.md)
 - [Week 8 - Controlled Destruction](Resources/Week-8/week8.md)
+- [Week 9 - Building the Denoiser (UNet)](Resources/Week-9/week9.md)
+- [Week 10 - Images from Pure Noise (Milestone 4)](Resources/Week-10/week10.md)
+- [Week 11 - Conditional Generation (CFG)](Resources/Week-11/week11.md)
+- [Week 12 - Text-to-Image with CLIP (Milestone 5)](Resources/Week-12/week12.md)
